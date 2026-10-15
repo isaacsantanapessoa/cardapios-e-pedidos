@@ -2,8 +2,8 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "C: gcc compilar arquivo ativo",
-            "type": "shell",
+            "label": "Compilar arquivo C ativo",
+            "type": "process",
             "command": "C:/msys64/ucrt64/bin/gcc.exe",
             "args": [
                 "-g",
@@ -17,11 +17,24 @@
                     "PATH": "C:/msys64/ucrt64/bin;${env:PATH}"
                 }
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": [
+                "$gcc"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Executar arquivo C ativo",
+            "type": "process",
+            "command": "${fileDirname}/${fileBasenameNoExtension}.exe",
+            "dependsOn": "Compilar arquivo C ativo",
+            "dependsOrder": "sequence",
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": []
         }
     ]
 }
