@@ -1,111 +1,400 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <conio.h>
-#include <ctype.h>
 
-int main()
-{
+#define tam 37
+#define maxProdutos 50
+#define maxMesas 50
 
-	int opcao,i = 0,encontrado = 0;
-	float valor[50][50];
-	char produto[50][50],busca[50];
-	char cardapio[50][50] = {
-		"PASTEL = R$ 30.00",
-		"FRITAS = R$ 45.00",
-		"HEINEKEN = R$ 15.00",
-		"COXINHA = R$ 20.00"
-	};
-	do
-	{
-		printf("\n====== MENU PRINCIPAL ======");
-		printf("\n1 - Cadastrar produto");
-		printf("\n2 - Listar Cardapio");
-		printf("\n3 - Buscar Produto");
-		printf("\n4 - Realizar Pedido");
-		printf("\n5 - Adicionar Item do Pedido");
-		printf("\n6 - Remover Item do Pedido");
-		printf("\n7 - Calcular Total do Pedido");
-		printf("\n8 - Listar Pedido");
-		printf("\n9 - Cancelar Pedido");
-		printf("\n10 - Finalizar Pedido");
-		printf("\n0 - Sair ");
-		printf("\n");
-		scanf("%d",&opcao);
-		
-		switch(opcao)
-		{
-			case 1:
-				{
-					printf("Informe um produto a ser cadastrado: ");
-					scanf("%s",&produto[i]);
-					
-					printf("\nInforme o valor do produto informado: ");
-					scanf("%f",&valor[i]);
-					break;
-				}
-			case 2:
-				{
-					printf("====== CARDAPIO ======\n");
-					printf("1 - %s\n", cardapio[0]);
-					printf("2 - %s\n", cardapio[1]);
-					printf("3 - %s\n", cardapio[2]);
-					printf("4 - %s\n", cardapio[3]);
-					break;
-				}
-			case 3:
-				{
-					encontrado = 0;
-					printf("Digite o produto que deseja buscar: ");
-					scanf("%s", busca);
 
-					for (i = 0; i < 4; i++)
-					{
-					    if (strcmp(busca, cardapio[i]) == 0)
-					    {
-    					    printf("Produto encontrado: %s\n", cardapio[i]);
-       						encontrado = 1;
-        					break;
-    					}
-					}
+struct Produto {
+    char nome[60];
+    char categoria[30];
+    float preco;
+};
 
-						if (encontrado == 0)
-						{
-    						printf("Produto nao encontrado.\n");
-						}
-					break;
-				}
-			case 4:
-				{
-					printf("\nRealizar Pedido: ");
-				}
-			case 5:
-				{
-					printf("\nAdicionar Item do Pedido: ");
-				}
-			case 6:
-				{
-					printf("\nRemover Item do Pedido: ");
-				}
-			case 7:
-				{
-					printf("\nCalcular Total do Pedido: ");
-				}
-			case 8:
-				{
-					printf("\nListar Pedido: ");
-				}
-			case 9:
-				{
-					printf("\nCancelar Pedido: ");
-				}
-			case 10:
-				{
-					printf("\nFinalizar Pedido: ");
-				}
-		}
-		
-	} while (opcao != 0);
-	
-	return 0;
+
+struct Mesa {
+    int aberta;
+};
+
+struct Produto cardapio[maxProdutos] = {
+    {"Heineken 600ml", "Cervejas", 17.00},
+    {"Long Neck Heineken", "Cervejas", 11.00},
+    {"Long Neck Heineken Zero", "Cervejas", 11.00},
+    {"Amstel 600ml", "Cervejas", 12.00},
+    {"Amstel Lata", "Cervejas", 6.00},
+    {"Devassa 600ml", "Cervejas", 10.00},
+
+    {"Tripa Suina", "Tira-Gosto", 49.00},
+    {"Carne do Sol", "Tira-Gosto", 50.00},
+    {"Carne do Sol Especial", "Tira-Gosto", 68.00},
+    {"Camarao ao Alho e Oleo", "Tira-Gosto", 58.00},
+    {"Sarapatel", "Tira-Gosto", 33.00},
+    {"Salame Fatiado", "Tira-Gosto", 19.00},
+    {"Prato de Frios", "Tira-Gosto", 39.00},
+
+    {"Caldo de Sururu", "Caldos", 18.00},
+    {"Caldo de Camarao", "Caldos", 18.00},
+    {"Caldo de Aipim", "Caldos", 18.00},
+    {"Caldo de Feijao", "Caldos", 18.00},
+
+    {"Pasteis Recheados (8 un)", "Pasteis", 30.00},
+    {"Batata Frita", "Porcoes", 30.00},
+
+    {"Whisky Red Label", "Drinques", 15.00},
+    {"Whisky Ballantines", "Drinques", 15.00},
+    {"Campari", "Drinques", 11.00},
+    {"Montilla", "Drinques", 9.00},
+    {"Bacardi", "Drinques", 9.00},
+    {"Vodka", "Drinques", 7.00},
+    {"Cachaca Cabare", "Drinques", 7.00},
+    {"Ice Cabare Limao", "Drinques", 11.00},
+    {"Beats", "Drinques", 10.00},
+
+    {"Refrigerante Lata", "Bebidas", 5.00},
+    {"Refrigerante 1 Litro", "Bebidas", 10.00},
+    {"Suco Del Valle", "Bebidas", 6.00},
+    {"H2O", "Bebidas", 7.00},
+    {"Red Bull", "Bebidas", 13.00},
+    {"TNT Energy", "Bebidas", 11.00},
+    {"Agua Tonica", "Bebidas", 7.00},
+    {"Agua com Gas", "Bebidas", 4.00},
+    {"Agua sem Gas", "Bebidas", 3.00}
+};
+
+struct Mesa mesas[maxMesas + 1] = {0};
+
+int pedidos[maxMesas + 1][maxProdutos] = {0};
+
+int qtdProdutos = tam;
+int mesaAtiva = 0;
+
+void listarCardapio() {
+    int i;
+
+    printf("\n====== CARDAPIO ======\n");
+
+    for (i = 0; i < qtdProdutos; i++) {
+        printf("\n%d - %s", i + 1, cardapio[i].nome);
+        printf(" | Categoria: %s", cardapio[i].categoria);
+        printf(" | R$ %.2f\n", cardapio[i].preco);
+    }
+}
+
+void cadastrarProduto() {
+    if (qtdProdutos >= maxProdutos) {
+        printf("\nLimite de produtos atingido!\n");
+        return;
+    }
+
+    printf("\nInforme o nome do produto: ");
+    scanf(" %59[^\n]", cardapio[qtdProdutos].nome);
+
+    printf("Informe a categoria: ");
+    scanf(" %29[^\n]", cardapio[qtdProdutos].categoria);
+
+    printf("Informe o preco: ");
+    scanf("%f", &cardapio[qtdProdutos].preco);
+
+    if (cardapio[qtdProdutos].preco <= 0) {
+        printf("\nPreco invalido!\n");
+        return;
+    }
+
+    qtdProdutos++;
+
+    printf("\nProduto cadastrado com sucesso!\n");
+}
+
+void buscarProduto() {
+    char busca[60];
+    int i, encontrado = 0;
+
+    printf("\nDigite o nome do produto: ");
+    scanf(" %59[^\n]", busca);
+
+    for (i = 0; i < qtdProdutos; i++) {
+
+        if (strcmp(busca, cardapio[i].nome) == 0) {
+
+            printf("\nProduto encontrado!");
+            printf("\nNome: %s", cardapio[i].nome);
+            printf("\nCategoria: %s", cardapio[i].categoria);
+            printf("\nPreco: R$ %.2f\n", cardapio[i].preco);
+
+            encontrado = 1;
+            break;
+        }
+    }
+
+    if (encontrado == 0) {
+        printf("\nProduto nao encontrado!\n");
+    }
+}
+
+void realizarPedido() {
+    int numero;
+
+    printf("\nInforme o numero da mesa (1 a 50): ");
+    scanf("%d", &numero);
+
+    if (numero < 1 || numero > maxMesas) {
+        printf("\nMesa invalida!\n");
+        return;
+    }
+
+    mesas[numero].aberta = 1;
+    mesaAtiva = numero;
+
+    printf("\nPedido iniciado na mesa %d!\n", mesaAtiva);
+}
+
+void adicionarItemPedido() {
+    int codigo, quantidade;
+
+    if (mesaAtiva == 0 || mesas[mesaAtiva].aberta == 0) {
+        printf("\nRealize um pedido primeiro!\n");
+        return;
+    }
+
+    listarCardapio();
+
+    printf("\nInforme o codigo do produto: ");
+    scanf("%d", &codigo);
+
+    if (codigo < 1 || codigo > qtdProdutos) {
+        printf("\nCodigo invalido!\n");
+        return;
+    }
+
+    printf("Informe a quantidade: ");
+    scanf("%d", &quantidade);
+
+    if (quantidade <= 0) {
+        printf("\nQuantidade invalida!\n");
+        return;
+    }
+
+    pedidos[mesaAtiva][codigo - 1] += quantidade;
+
+    printf("\nProduto adicionado ao pedido!\n");
+}
+
+void removerItemPedido() {
+    int codigo, quantidade;
+
+    if (mesaAtiva == 0 || mesas[mesaAtiva].aberta == 0) {
+        printf("\nNenhum pedido ativo!\n");
+        return;
+    }
+
+    listarCardapio();
+
+    printf("\nInforme o codigo do produto: ");
+    scanf("%d", &codigo);
+
+    if (codigo < 1 || codigo > qtdProdutos) {
+        printf("\nCodigo invalido!\n");
+        return;
+    }
+
+    if (pedidos[mesaAtiva][codigo - 1] == 0) {
+        printf("\nEsse produto nao esta no pedido!\n");
+        return;
+    }
+
+    printf("Informe a quantidade que deseja remover: ");
+    scanf("%d", &quantidade);
+
+    if (quantidade <= 0 ||
+        quantidade > pedidos[mesaAtiva][codigo - 1]) {
+
+        printf("\nQuantidade invalida!\n");
+        return;
+    }
+
+    pedidos[mesaAtiva][codigo - 1] -= quantidade;
+
+    printf("\nItem removido com sucesso!\n");
+}
+
+float calcularTotalPedido() {
+    int i;
+    float total = 0;
+
+    for (i = 0; i < qtdProdutos; i++) {
+
+        total += pedidos[mesaAtiva][i] *
+                 cardapio[i].preco;
+    }
+
+    return total;
+}
+
+void listarPedido() {
+    int i, encontrou = 0;
+
+    if (mesaAtiva == 0 || mesas[mesaAtiva].aberta == 0) {
+        printf("\nNenhum pedido ativo!\n");
+        return;
+    }
+
+    printf("\n====== PEDIDO DA MESA %d ======\n", mesaAtiva);
+
+    for (i = 0; i < qtdProdutos; i++) {
+
+        if (pedidos[mesaAtiva][i] > 0) {
+
+            printf("\nProduto: %s", cardapio[i].nome);
+
+            printf("\nQuantidade: %d",
+                   pedidos[mesaAtiva][i]);
+
+            printf("\nSubtotal: R$ %.2f\n",
+                   pedidos[mesaAtiva][i] *
+                   cardapio[i].preco);
+
+            encontrou = 1;
+        }
+    }
+
+    if (encontrou == 0) {
+        printf("\nPedido vazio!\n");
+    }
+
+    printf("\nTotal: R$ %.2f\n", calcularTotalPedido());
+}
+
+void cancelarPedido() {
+    int i;
+
+    if (mesaAtiva == 0 || mesas[mesaAtiva].aberta == 0) {
+        printf("\nNenhum pedido ativo!\n");
+        return;
+    }
+
+    for (i = 0; i < qtdProdutos; i++) {
+        pedidos[mesaAtiva][i] = 0;
+    }
+
+    mesas[mesaAtiva].aberta = 0;
+
+    printf("\nPedido cancelado com sucesso!\n");
+
+    mesaAtiva = 0;
+}
+
+void finalizarPedido() {
+    float total;
+
+    if (mesaAtiva == 0 || mesas[mesaAtiva].aberta == 0) {
+        printf("\nNenhum pedido ativo!\n");
+        return;
+    }
+
+    total = calcularTotalPedido();
+
+    printf("\n====== FINALIZAMENTO ======\n");
+    printf("\nMesa: %d", mesaAtiva);
+    printf("\nTotal a pagar: R$ %.2f\n", total);
+
+    mesas[mesaAtiva].aberta = 0;
+
+    int i;
+
+    for (i = 0; i < qtdProdutos; i++) {
+        pedidos[mesaAtiva][i] = 0;
+    }
+
+    printf("\nPedido finalizado com sucesso!\n");
+
+    mesaAtiva = 0;
+}
+
+int main() {
+
+    int opcao;
+
+    do {
+
+        printf("\n====== MENU PRINCIPAL ======\n");
+        printf("\n1 - Cadastrar produto");
+        printf("\n2 - Listar Cardapio");
+        printf("\n3 - Buscar Produto");
+        printf("\n4 - Realizar Pedido");
+        printf("\n5 - Adicionar Item do Pedido");
+        printf("\n6 - Remover Item do Pedido");
+        printf("\n7 - Calcular Total do Pedido");
+        printf("\n8 - Listar Pedido");
+        printf("\n9 - Cancelar Pedido");
+        printf("\n10 - Finalizar Pedido");
+        printf("\n0 - Sair");
+
+        printf("\n\nEscolha uma opcao: ");
+        scanf("%d", &opcao);
+
+        switch(opcao) {
+
+            case 1:
+                cadastrarProduto();
+                break;
+
+            case 2:
+                listarCardapio();
+                break;
+
+            case 3:
+                buscarProduto();
+                break;
+
+            case 4:
+                realizarPedido();
+                break;
+
+            case 5:
+                adicionarItemPedido();
+                break;
+
+            case 6:
+                removerItemPedido();
+                break;
+
+            case 7:
+
+                if (mesaAtiva != 0 &&
+                    mesas[mesaAtiva].aberta == 1) {
+
+                    printf("\nTotal do pedido: R$ %.2f\n",
+                           calcularTotalPedido());
+
+                } else {
+                    printf("\nNenhum pedido ativo!\n");
+                }
+
+                break;
+
+            case 8:
+                listarPedido();
+                break;
+
+            case 9:
+                cancelarPedido();
+                break;
+
+            case 10:
+                finalizarPedido();
+                break;
+
+            case 0:
+                printf("\nEncerrando sistema...\n");
+                break;
+
+            default:
+                printf("\nOpcao invalida!\n");
+        }
+
+    } while (opcao != 0);
+
+    system("pause");
 }
