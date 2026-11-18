@@ -97,7 +97,7 @@ int main()
 				}
 			case 9:
 				{
-					printf("\nCancelar PEdido: ");
+					printf("\nCancelar Pedido: ");
 				}
 			case 10:
 				{
