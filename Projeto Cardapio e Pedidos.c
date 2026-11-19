@@ -1,18 +1,18 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 
 #define tam 37
 #define maxProdutos 50
 #define maxMesas 50
-
 
 struct Produto {
     char nome[60];
     char categoria[30];
     float preco;
 };
-
 
 struct Mesa {
     int aberta;
@@ -88,23 +88,23 @@ void cadastrarProduto() {
         return;
     }
 
-    printf("\nInforme o nome do produto: ");
+    printf("\nNome do produto: ");
     scanf(" %59[^\n]", cardapio[qtdProdutos].nome);
 
-    printf("Informe a categoria: ");
+    printf("Categoria: ");
     scanf(" %29[^\n]", cardapio[qtdProdutos].categoria);
 
-    printf("Informe o preco: ");
+    printf("Preco: R$ ");
     scanf("%f", &cardapio[qtdProdutos].preco);
 
     if (cardapio[qtdProdutos].preco <= 0) {
-        printf("\nPreco invalido!\n");
+        printf("\nO preco informado e invalido!\n");
         return;
     }
 
     qtdProdutos++;
 
-    printf("\nProduto cadastrado com sucesso!\n");
+    printf("\nProduto cadastrado!\n");
 }
 
 void buscarProduto() {
@@ -115,9 +115,7 @@ void buscarProduto() {
     scanf(" %59[^\n]", busca);
 
     for (i = 0; i < qtdProdutos; i++) {
-
         if (strcmp(busca, cardapio[i].nome) == 0) {
-
             printf("\nProduto encontrado!");
             printf("\nNome: %s", cardapio[i].nome);
             printf("\nCategoria: %s", cardapio[i].categoria);
@@ -137,17 +135,27 @@ void realizarPedido() {
     int numero;
 
     printf("\nInforme o numero da mesa (1 a 50): ");
-    scanf("%d", &numero);
-
-    if (numero < 1 || numero > maxMesas) {
-        printf("\nMesa invalida!\n");
+    
+    if (scanf("%d", &numero) != 1) {
+        printf("\nDigite apenas o numero da mesa!\n");
+        while (getchar() != '\n');
         return;
     }
 
-    mesas[numero].aberta = 1;
-    mesaAtiva = numero;
+    if (numero < 1 || numero > maxMesas) {
+        printf("\nNumero de mesa invalido!\n");
+        return;
+    }
 
-    printf("\nPedido iniciado na mesa %d!\n", mesaAtiva);
+    if (mesas[numero].aberta == 1) {
+        printf("\nEssa mesa ja possui um pedido aberto.\n");
+        printf("Pedido da mesa %d selecionado!\n", numero);
+    } else {
+        mesas[numero].aberta = 1;
+        printf("\nPedido iniciado na mesa %d!\n", numero);
+    }
+
+    mesaAtiva = numero;
 }
 
 void adicionarItemPedido() {
@@ -160,16 +168,26 @@ void adicionarItemPedido() {
 
     listarCardapio();
 
-    printf("\nInforme o codigo do produto: ");
-    scanf("%d", &codigo);
+    printf("\nCodigo do produto: ");
+
+    if (scanf("%d", &codigo) != 1) {
+        printf("\nDigite apenas o numero do produto!\n");
+        while (getchar() != '\n');
+        return;
+    }
 
     if (codigo < 1 || codigo > qtdProdutos) {
         printf("\nCodigo invalido!\n");
         return;
     }
 
-    printf("Informe a quantidade: ");
-    scanf("%d", &quantidade);
+    printf("Quantidade: ");
+
+    if (scanf("%d", &quantidade) != 1) {
+        printf("\nDigite uma quantidade valida!\n");
+        while (getchar() != '\n');
+        return;
+    }
 
     if (quantidade <= 0) {
         printf("\nQuantidade invalida!\n");
@@ -178,7 +196,7 @@ void adicionarItemPedido() {
 
     pedidos[mesaAtiva][codigo - 1] += quantidade;
 
-    printf("\nProduto adicionado ao pedido!\n");
+    printf("\nItem adicionado ao pedido!\n");
 }
 
 void removerItemPedido() {
@@ -191,8 +209,13 @@ void removerItemPedido() {
 
     listarCardapio();
 
-    printf("\nInforme o codigo do produto: ");
-    scanf("%d", &codigo);
+    printf("\nCodigo do produto: ");
+
+    if (scanf("%d", &codigo) != 1) {
+        printf("\nDigite apenas o numero do produto!\n");
+        while (getchar() != '\n');
+        return;
+    }
 
     if (codigo < 1 || codigo > qtdProdutos) {
         printf("\nCodigo invalido!\n");
@@ -204,19 +227,23 @@ void removerItemPedido() {
         return;
     }
 
-    printf("Informe a quantidade que deseja remover: ");
-    scanf("%d", &quantidade);
+    printf("Quantidade que deseja remover: ");
+
+    if (scanf("%d", &quantidade) != 1) {
+        printf("\nDigite uma quantidade valida!\n");
+        while (getchar() != '\n');
+        return;
+    }
 
     if (quantidade <= 0 ||
         quantidade > pedidos[mesaAtiva][codigo - 1]) {
-
         printf("\nQuantidade invalida!\n");
         return;
     }
 
     pedidos[mesaAtiva][codigo - 1] -= quantidade;
 
-    printf("\nItem removido com sucesso!\n");
+    printf("\nItem removido do pedido!\n");
 }
 
 float calcularTotalPedido() {
@@ -224,9 +251,7 @@ float calcularTotalPedido() {
     float total = 0;
 
     for (i = 0; i < qtdProdutos; i++) {
-
-        total += pedidos[mesaAtiva][i] *
-                 cardapio[i].preco;
+        total += pedidos[mesaAtiva][i] * cardapio[i].preco;
     }
 
     return total;
@@ -243,24 +268,18 @@ void listarPedido() {
     printf("\n====== PEDIDO DA MESA %d ======\n", mesaAtiva);
 
     for (i = 0; i < qtdProdutos; i++) {
-
         if (pedidos[mesaAtiva][i] > 0) {
-
             printf("\nProduto: %s", cardapio[i].nome);
-
-            printf("\nQuantidade: %d",
-                   pedidos[mesaAtiva][i]);
-
+            printf("\nQuantidade: %d", pedidos[mesaAtiva][i]);
             printf("\nSubtotal: R$ %.2f\n",
-                   pedidos[mesaAtiva][i] *
-                   cardapio[i].preco);
+                   pedidos[mesaAtiva][i] * cardapio[i].preco);
 
             encontrou = 1;
         }
     }
 
     if (encontrou == 0) {
-        printf("\nPedido vazio!\n");
+        printf("\nO pedido ainda esta vazio!\n");
     }
 
     printf("\nTotal: R$ %.2f\n", calcularTotalPedido());
@@ -280,13 +299,14 @@ void cancelarPedido() {
 
     mesas[mesaAtiva].aberta = 0;
 
-    printf("\nPedido cancelado com sucesso!\n");
+    printf("\nPedido da mesa %d cancelado!\n", mesaAtiva);
 
     mesaAtiva = 0;
 }
 
 void finalizarPedido() {
     float total;
+    int i;
 
     if (mesaAtiva == 0 || mesas[mesaAtiva].aberta == 0) {
         printf("\nNenhum pedido ativo!\n");
@@ -295,13 +315,11 @@ void finalizarPedido() {
 
     total = calcularTotalPedido();
 
-    printf("\n====== FINALIZAMENTO ======\n");
+    printf("\n====== FINALIZACAO DO PEDIDO ======\n");
     printf("\nMesa: %d", mesaAtiva);
     printf("\nTotal a pagar: R$ %.2f\n", total);
 
     mesas[mesaAtiva].aberta = 0;
-
-    int i;
 
     for (i = 0; i < qtdProdutos; i++) {
         pedidos[mesaAtiva][i] = 0;
@@ -313,29 +331,33 @@ void finalizarPedido() {
 }
 
 int main() {
-
     int opcao;
 
-    do {
+    setlocale(LC_ALL, "Portuguese");
 
+    do {
         printf("\n====== MENU PRINCIPAL ======\n");
         printf("\n1 - Cadastrar produto");
-        printf("\n2 - Listar Cardapio");
-        printf("\n3 - Buscar Produto");
-        printf("\n4 - Realizar Pedido");
-        printf("\n5 - Adicionar Item do Pedido");
-        printf("\n6 - Remover Item do Pedido");
-        printf("\n7 - Calcular Total do Pedido");
-        printf("\n8 - Listar Pedido");
-        printf("\n9 - Cancelar Pedido");
-        printf("\n10 - Finalizar Pedido");
+        printf("\n2 - Listar cardapio");
+        printf("\n3 - Buscar produto");
+        printf("\n4 - Realizar pedido");
+        printf("\n5 - Adicionar item ao pedido");
+        printf("\n6 - Remover item do pedido");
+        printf("\n7 - Calcular total do pedido");
+        printf("\n8 - Listar pedido");
+        printf("\n9 - Cancelar pedido");
+        printf("\n10 - Finalizar pedido");
         printf("\n0 - Sair");
 
         printf("\n\nEscolha uma opcao: ");
-        scanf("%d", &opcao);
 
-        switch(opcao) {
+        if (scanf("%d", &opcao) != 1) {
+            printf("\nDigite uma opcao valida!\n");
+            while (getchar() != '\n');
+            continue;
+        }
 
+        switch (opcao) {
             case 1:
                 cadastrarProduto();
                 break;
@@ -361,17 +383,12 @@ int main() {
                 break;
 
             case 7:
-
-                if (mesaAtiva != 0 &&
-                    mesas[mesaAtiva].aberta == 1) {
-
+                if (mesaAtiva != 0 && mesas[mesaAtiva].aberta == 1) {
                     printf("\nTotal do pedido: R$ %.2f\n",
                            calcularTotalPedido());
-
                 } else {
                     printf("\nNenhum pedido ativo!\n");
                 }
-
                 break;
 
             case 8:
@@ -387,14 +404,16 @@ int main() {
                 break;
 
             case 0:
-                printf("\nEncerrando sistema...\n");
+                printf("\nEncerrando o sistema...\n");
                 break;
 
             default:
-                printf("\nOpcao invalida!\n");
+                printf("\nOpcao invalida! Tente novamente.\n");
         }
 
     } while (opcao != 0);
 
     system("pause");
+
+    return 0;
 }
